@@ -5,11 +5,9 @@ Created on Sun Jul 30 21:08:31 2023
 @author: Soo.Y
 """
 import sys
-
 my_args = sys.argv[1]
 my_id = my_args.split(';')[0]
 my_pw = my_args.split(';')[1]
-
 
 import time
 from selenium import webdriver
