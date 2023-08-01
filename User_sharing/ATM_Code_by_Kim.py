@@ -23,12 +23,14 @@ def tts_engine():
 class NotEnoughMoneyError(Exception):
     pass
 
-
+### enum으로 사용해서 before에 1, after에 2 입력
+### user_input을 1, notify_message을 2로 
 class SayOrder(Enum):
     BEFORE = auto(),
     AFTER = auto()
 
-
+### enum으로 사용해서 FINISH 1, PROGRESS에 2 입력
+### 숫자 1과 2를 사용해서 프로그램 종료 여부를 확인...
 class TradingProgress(Enum):
     FINISH = auto(),
     PROGRESS = auto()
