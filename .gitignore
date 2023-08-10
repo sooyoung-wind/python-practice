@@ -1,2 +1,5 @@
 # my env
 env/
+
+.spyproject
+__pycache__
