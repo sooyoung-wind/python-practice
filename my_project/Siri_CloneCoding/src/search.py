@@ -8,7 +8,7 @@ Created on Mon Aug  7 13:08:49 2023
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.common.exceptions import NoSuchDriverException
-from src.call_api import call_api
+from src.common.call_api import call_api
 import time
 
 
@@ -24,7 +24,8 @@ def my_search(target_url="https://www.naver.com", myDriver=None) -> None:
     None.
 
     '''
-    myPath_chromedriver = call_api('chromedriver_path')
+    # myPath_chromedriver = call_api('chromedriver_path')
+    myPath_chromedriver = myDriver.userInfo['chromedriver_path']
 
     try:
         if hasattr(myDriver, 'driver'):

@@ -13,7 +13,7 @@ import speech_recognition as sr
 
 
 class MySpeech:
-    def __init__(self, text="반갑습니다. 원하실떄 저를 불러주세요."):
+    def __init__(self, text="안녕하세요. 부팅이 완료되었습니다."):
         self.text = text
         pass
 

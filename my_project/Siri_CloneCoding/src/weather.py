@@ -6,20 +6,20 @@ Created on Mon Aug  7 13:38:32 2023
 """
 import requests
 import json
-from src.call_lat_long import call_lat_long
+from src.common.call_lat_long import call_lat_long
 
 
-def call_weather_info(target_name: str, googlemaps_api_key: str, siri) -> None:
+def call_weather_info(target_name: str, myDriver) -> None:
     celsius_symbol = '\u2103'
 
     # gps lat, long call method
     try:
-        latitude, longitude = call_lat_long(target_name, googlemaps_api_key)
+        latitude, longitude = call_lat_long(target_name, myDriver.userInfo['googlemaps_api_key'])
         latitude = "latitude=" + str(latitude)
         longitude = "longitude=" + str(longitude)
     except IndexError:
-        siri.text = '검색이 안되는 주소입니다. 기본으로 설정된 주소가 입력됩니다.'
-        siri.speak()
+        myDriver.text = '검색이 안되는 주소입니다. 기본으로 설정된 주소가 입력됩니다.'
+        myDriver.speak()
         latitude = "latitude=33.3846216"
         longitude = "longitude=126.5534925"
 
@@ -43,8 +43,8 @@ def call_weather_info(target_name: str, googlemaps_api_key: str, siri) -> None:
     temp_min_text = f'최저 온도는 {temp_min}{celsius_symbol}입니다.'
 
     results_text = rain_text + temp_max_text + temp_min_text
-    siri.text = results_text
-    siri.speak()
+    myDriver.text = results_text
+    myDriver.speak()
 
 
 if __name__ == "__main__":
