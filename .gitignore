@@ -4,3 +4,5 @@ env/
 .spyproject
 .vscode
 __pycache__
+
+my_project/Siri_CloneCoding/DB/siri_userData.db
