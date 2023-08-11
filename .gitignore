@@ -2,4 +2,5 @@
 env/
 
 .spyproject
+.vscode
 __pycache__
