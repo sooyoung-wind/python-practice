@@ -13,6 +13,7 @@ from src.common.load_modules import load_all_modules
 from src.common.extracting_search_words import extracting_search_words
 from src.common.user_login import doingLogin
 from src.sql.SQL_handing import *
+import os
 
 
 def run():
@@ -29,6 +30,10 @@ def run():
         isDoing = False
 
     # 유저 정보 입력
+    if not os.path.isfile("DB/siri_userData.db"):
+        print("사용자 정보가 없습니다.")
+        sql_create() # DB 생성
+        sql_new_user() # 유저 입력
 
     while isLoding:
         siri = MySpeech()
