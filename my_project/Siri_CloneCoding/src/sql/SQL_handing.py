@@ -24,7 +24,7 @@ def sql_new_user():
 
 
 def sql_insert(user_variables):
-    conn = sqlite3.connect("D:\Dev_folder\SQLite_DB\my_test\siri_userData.db")
+    conn = sqlite3.connect("DB/siri_userData.db")
     cur = conn.cursor()
 
     INSERT_SQL = """
@@ -40,10 +40,11 @@ def sql_insert(user_variables):
 
 
 def sql_delete(user_variables):
-    conn = sqlite3.connect("D:\Dev_folder\SQLite_DB\my_test\siri_userData.db")
+    conn = sqlite3.connect("DB/siri_userData.db")
     cur = conn.cursor()
 
-    cur.execute("DELETE FROM items WHERE name=:name", {'name': user_variables['name']})
+    cur.execute("DELETE FROM items WHERE name=:name",
+                {'name': user_variables['name']})
     conn.commit()
     conn.close()
 
@@ -70,7 +71,7 @@ def _making_sentence(update_num):
 
 
 def sql_update(user_variables):
-    conn = sqlite3.connect("D:\Dev_folder\SQLite_DB\my_test\siri_userData.db")
+    conn = sqlite3.connect("DB/siri_userData.db")
     cur = conn.cursor()
 
     target_id = sql_retrieval(user_variables)
@@ -93,10 +94,11 @@ def sql_update(user_variables):
 
 
 def sql_retrieval(user_variables):
-    conn = sqlite3.connect("D:\Dev_folder\SQLite_DB\my_test\siri_userData.db")
+    conn = sqlite3.connect("DB/siri_userData.db")
     cur = conn.cursor()
 
-    user_info = cur.execute("SELECT * FROM items WHERE name=:name;", {'name': user_variables['name']}).fetchall()
+    user_info = cur.execute("SELECT * FROM items WHERE name=:name;",
+                            {'name': user_variables['name']}).fetchall()
 
     for info in user_info:
         sql_id, name, googlemaps_api_key, chromedriver_path, airKorea_api_key, call, note = info
@@ -114,9 +116,12 @@ def sql_retrieval(user_variables):
 
 
 def sql_user_list():
-    conn = sqlite3.connect("D:\Dev_folder\SQLite_DB\my_test\siri_userData.db")
+    import os
+    print(os.getcwd())
+    conn = sqlite3.connect("DB/siri_userData.db")
     cur = conn.cursor()
-    user_info = cur.execute("SELECT id, name FROM items ORDER BY id").fetchall()
+    user_info = cur.execute(
+        "SELECT id, name FROM items ORDER BY id").fetchall()
 
     print('-' * 20)
     for info in user_info:
@@ -129,15 +134,17 @@ def sql_user_list():
 
 
 def sql_user_gain(sql_id):
-    conn = sqlite3.connect("D:\Dev_folder\SQLite_DB\my_test\siri_userData.db")
+    conn = sqlite3.connect("DB/siri_userData.db")
     cur = conn.cursor()
-    user_info = cur.execute("SELECT * FROM items WHERE id=:id;", {'id': sql_id}).fetchall()
+    user_info = cur.execute(
+        "SELECT * FROM items WHERE id=:id;", {'id': sql_id}).fetchall()
 
     if len(user_info) == 0:
         print("해당 ID가 존재하지 않습니다.")
         return True, None
     else:
-        sql_id, name, googlemaps_api_key, chromedriver_path, airKorea_api_key, call, note = user_info[0]
+        sql_id, name, googlemaps_api_key, chromedriver_path, airKorea_api_key, call, note = user_info[
+            0]
         user_variables = {'sql_id': sql_id,
                           'name': name,
                           'googlemaps_api_key': googlemaps_api_key,
@@ -147,3 +154,22 @@ def sql_user_gain(sql_id):
                           'note': note
                           }
         return False, user_variables
+
+
+def sql_create():
+    print("DB를 새로 생성합니다.")
+    conn = sqlite3.connect("DB/siri_userData.db")
+    cur = conn.cursor()
+    CREATE_SQL = """
+        CREATE TABLE IF NOT EXISTS items(
+            id integer primary key autoincrement,
+            name text not null,
+            googlemaps_api_key text not null,
+            chromedriver_path text not null,
+            airKorea_api_key text not null,
+            call text not null,
+            note
+            )
+    """
+    cur.execute(CREATE_SQL)
+    conn.close()
