@@ -4,7 +4,8 @@
 This code is a collection of functions that I need for performing EDA.
 """
 
-
+# null_check function is no need to use it anymore.
+# you can use this code "data.loc[data.isnull().any(axis=1)] "
 def null_check(data):
     """
     This function checks for null data in dataframe of pandas.
