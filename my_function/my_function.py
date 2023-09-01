@@ -103,3 +103,108 @@ def my_outlier_Zscore(data):
     mask = [abs(z) > threshold for z in z_score]  # True & False
 
     return mask
+
+##############################################
+# 5. Correlation Analysis (Korelasyon Analizi)
+##############################################
+
+
+def corr_map(df, width=14, height=6, annot_kws=15):
+    """
+    Parameters
+    ----------
+    df : Pandas data frame, but only numerical type not object
+        DESCRIPTION.
+    width : TYPE, optional
+        DESCRIPTION. The default is 14.
+    height : TYPE, optional
+        DESCRIPTION. The default is 6.
+    annot_kws : TYPE, optional
+        DESCRIPTION. The default is 15.
+
+    Returns
+    -------
+    None.
+
+    """
+    mtx = np.triu(df.corr())
+    f, ax = plt.subplots(figsize=(width, height))
+    sns.heatmap(df.corr(),
+                annot=True,
+                fmt=".2f",
+                ax=ax,
+                vmin=-1,
+                vmax=1,
+                cmap="RdBu",
+                mask=mtx,
+                linewidth=0.4,
+                linecolor="black",
+                cbar=False,
+                annot_kws={"size": annot_kws})
+    plt.yticks(rotation=0, size=15)
+    plt.xticks(rotation=75, size=15)
+    plt.title('\nCorrelation Map\n', size=20)
+    plt.show()
+
+
+corr_map(df, width=20, height=10, annot_kws=8)
+
+
+def draw_plt_table(data, name, num_bins=30):
+    """
+    DataFrame Draw plot and table generation
+
+    Parameters
+    ----------
+    data : pandas dataframe
+    name : Str, target name of dataframe
+    num_bins : histogram bins, integer
+        DESCRIPTION. The default is 30.
+
+    Returns
+    -------
+    result_df : dataframe
+        this is table of value counts
+
+    """
+    sub_data = data[name]
+    TF_Zscore = my_outlier_Zscore(sub_data)
+    TF_IQR = my_outlier_IQR(sub_data)  # True & False list using my_outlier
+
+    plt.figure(figsize=(15, 4))
+    plt.subplot(1, 3, 1)
+    plt.hist(sub_data, bins=num_bins)
+    plt.title('Original')
+    plt.subplot(1, 3, 2)
+    plt.hist(sub_data[TF_IQR], bins=num_bins)
+    plt.title('Zscore filter')
+    plt.subplot(1, 3, 3)
+    plt.hist(sub_data[[not x for x in TF_IQR]], bins=num_bins)
+    plt.title('Filtered data')
+    plt.suptitle(name + '(IQR)')
+
+    plt.show()
+
+    plt.figure(figsize=(15, 4))
+    plt.subplot(1, 3, 1)
+    plt.hist(sub_data, bins=num_bins)
+    plt.title('Original')
+    plt.subplot(1, 3, 2)
+    plt.hist(sub_data[TF_Zscore], bins=num_bins)
+    plt.title('Zscore filter')
+    plt.subplot(1, 3, 3)
+    plt.hist(sub_data[[not x for x in TF_Zscore]], bins=num_bins)
+    plt.title('Filtered data')
+    plt.suptitle(name + 'Z-score')
+
+    plt.show()
+
+    table_original = sub_data.value_counts(bins=num_bins, sort=False)
+    table_TF_IQR = sub_data[TF_IQR].value_counts(bins=num_bins, sort=False)
+    table_TF_Zscore = sub_data[TF_Zscore].value_counts(bins=num_bins, sort=False)
+
+    result_df = pd.DataFrame({'Original': table_original.index, 'Counts(raw)': table_original.values,
+                              'IQR filter': table_TF_IQR.index, 'Counts(IQR)': table_TF_IQR.values,
+                              'Z-score': table_TF_Zscore.index, 'Counts(Z-score)': table_TF_Zscore.values})
+
+    return result_df
