@@ -147,9 +147,6 @@ def corr_map(df, width=14, height=6, annot_kws=15):
     plt.show()
 
 
-corr_map(df, width=20, height=10, annot_kws=8)
-
-
 def draw_plt_table(data, name, num_bins=30):
     """
     DataFrame Draw plot and table generation
