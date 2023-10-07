@@ -36,7 +36,8 @@ temp_2 = [ii for ii in temp_1.index]
 gift_set = set()
 for words in temp_2:
     for word in Okt().nouns(words):
-        gift_set.add(word)
+        if len(word) > 1:
+            gift_set.add(word)
 
 #######################
 # 전처리
@@ -87,15 +88,17 @@ def my_rmse(true, pred, sample_weight=None):
     return np.sqrt(np.mean((true - pred)**2))
 
 
+rmse_scorer = make_scorer(lambda y_true, y_pred: np.sqrt(mean_squared_error(y_true, y_pred)), greater_is_better=False)
+
 evaluation_metric = make_scorer(my_rmse, greater_is_better=False)
 
 
 rf_model = RandomForestRegressor()
-rf_params = {'random_state': [9234], 'n_estimators': [1000],
-             'max_depth': [60, 90], 'min_samples_split': [3, 6]}
+rf_params = {'random_state': [9234], 'n_estimators': [500, 1000, 2000],
+             'max_depth': [30, 60], 'min_samples_split': [3, 5, 10]}
 gridsearch_random_foreset_model = GridSearchCV(estimator=rf_model,
                                                param_grid=rf_params,
-                                               cv=5)
+                                               cv=5, scoring=rmse_scorer)
 
 gridsearch_random_foreset_model.fit(x.iloc[x_train_idx], y.iloc[y_train_idx])
 

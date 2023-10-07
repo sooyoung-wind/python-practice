@@ -9,6 +9,7 @@ Created on Sat Sep 30 23:14:18 2023
 import xgboost as xgb
 from sklearn.metrics import make_scorer
 from konlpy.tag import Okt
+from sklearn.preprocessing import MinMaxScaler
 from sklearn.metrics import mean_squared_error
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import GridSearchCV
@@ -31,23 +32,30 @@ test.columns = ["ID", "weeks", "shop_num", 'price', 'promotion',
 
 def my_rmse(true, pred, sample_weight=None):
     return np.sqrt(np.mean((true - pred)**2))
+
+
 #######################
 # self Gift category
 #######################
-
-
 temp_1 = train.gift.value_counts()
 temp_2 = [ii for ii in temp_1.index]
 
 gift_set = set()
 for words in temp_2:
     for word in Okt().nouns(words):
-        gift_set.add(word)
+        if len(word) > 1:
+            gift_set.add(word)
+
+
+# gift_set = ["새우", '특선', '곶감', '샤인머스켓', '스팸',
+#             '송이버섯', '자연', '실속', '표고버섯', '행복',
+#             '찬스', '유기농', '견과', '최고',
+#             '최고급', '프리미엄', '명품', '스페셜', '고급',
+#             '올리브유', '견과류', '홍삼', '종합', '재래']
 
 #######################
 # 전처리
 #######################
-
 
 def my_process_define(train):
     # 쇼핑몰 구분 필요
@@ -67,20 +75,32 @@ def my_process_define(train):
         for gift_word in gift_set:
             if gift_word in gift_full_name:
                 train[gift_word][idx] = 1
+    # train['target'] = np.log(train.target)
 
 
 #####################
 # data split
 #####################
-
 my_process_define(train)
-x = train.drop(columns=['ID', 'target', 'gift'])
-y = train['target']
 
+x = train.drop(columns=['ID', 'gift', 'target'])
+y = pd.DataFrame(train['target'])
 
 # index
 idx = list(range(train.shape[0]))
 x_train_idx, x_valid_idx, y_train_idx, y_valid_idx = train_test_split(idx, idx, test_size=0.3, random_state=9234)
+
+#####################
+# Scale
+#####################
+
+x_scaler = MinMaxScaler(feature_range=(0, 1))
+x_scaler.fit(x)
+x = pd.DataFrame(x_scaler.transform(x), columns=x.columns)
+
+y_scaler = MinMaxScaler(feature_range=(0, 1))
+y_scaler.fit(y)
+y = pd.DataFrame(y_scaler.transform(y), columns=y.columns)
 
 
 #####################
@@ -115,9 +135,9 @@ def modelfit(pip_xgb, grid_param_xgb, x, y):
 #     ('reg', MultiOutputRegressor(xgb.XGBRegressor()))])
 
 grid_param_xgb1 = {
-    'n_estimators': [100, 200],
+    'n_estimators': [500, 1000],
     'max_depth': [3, 5, 10],
-    'subsample': [1, 5, 10]
+    'subsample': [1, 5, 10],
     # 'reg__estimator__gamma' : [1, 0.1, 0.01, 0.001, 0.0001, 0],
     # 'reg__estimator__learning_rate' : [0.01, 0.03, 0.05, 0.07, 0.08],
     # 'reg__estimator__subsample' : [0.4, 0.6, 0.8],
@@ -127,15 +147,24 @@ grid_param_xgb1 = {
 modelfit(xgb.XGBRegressor(), grid_param_xgb1, x.iloc[x_train_idx], y.iloc[y_train_idx])
 
 
-xgb_model = xgb.XGBRFRegressor(n_estimators=200, max_depth=5,
+########################################################
+# 단일 파라미터 실행
+########################################################
+xgb_model = xgb.XGBRFRegressor(n_estimators=500, max_depth=3,
                                eval_metric='rmse', random_state=9234)
 
 
 xgb_model.fit(x.iloc[x_train_idx], y.iloc[y_train_idx])
 
-predict_result = xgb_model.predict(x.iloc[x_train_idx])
+#######################
+# 성능 점검
+#######################
 
-my_rmse(predict_result, y.iloc[y_train_idx])
+predict_result = xgb_model.predict(x.iloc[x_train_idx])
+my_rmse(predict_result, y.iloc[y_train_idx].squeeze())
+
+predict_result = xgb_model.predict(x.iloc[x_valid_idx])
+my_rmse(np.exp(predict_result), y.iloc[y_valid_idx])
 
 #######################
 # Test
@@ -144,6 +173,8 @@ test_input = test.copy()
 my_process_define(test_input)
 test_input = test_input.drop(columns=['ID', 'gift'])
 
-submission['수요량'] = xgb_model.predict(test_input)
+test_scaled = pd.DataFrame(x_scaler.transform(test_input), columns=test_input.columns)
+
+submission['수요량'] = y_scaler.inverse_transform(pd.DataFrame(xgb_model.predict(test_input)))
 
 submission.to_csv(base_path + "soo_submission.csv", index=False)

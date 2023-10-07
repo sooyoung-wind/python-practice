@@ -110,12 +110,11 @@ gridsearch_random_foreset_model.best_estimator_
 # 단일 파라미터 동작
 ###################
 
-rf_model = RandomForestRegressor(n_estimators=100,
+rf_model = RandomForestRegressor(n_estimators=1000,
                                  # criterion = evaluation_metric,
-                                 oob_score=True,
-                                 max_depth=10,
-                                 min_samples_split=20,
-                                 min_samples_leaf=10,
+                                 # oob_score=True,
+                                 max_depth=60,
+                                 min_samples_split=3,
                                  random_state=9234)
 
 # rf_model.fit(x.iloc[x_train_idx], y.iloc[y_train_idx])
